@@ -1,6 +1,7 @@
 package com.example.dynamiccalculator;
 
 import android.app.ActionBar;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onGlobalLayout() {
                         populateButtonGrid();
+                        if (Build.VERSION.SDK_INT > 16) {
+                            buttonGrid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        } else {
+                            buttonGrid.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        }
                     }
                 });
     }
@@ -40,15 +46,19 @@ public class MainActivity extends AppCompatActivity {
         final char numList[][] = {
                 {'7', '8', '9'},
                 {'4', '5', '6'},
-                {'1', '2', '3'}
+                {'1', '2', '3'},
+                {'0', '.', '='}
         };
 
-        for(int row = 0; row < 3; row++) {
+        final char operatorList[] = {
+                '/', 'x', '+', '-'
+        };
+
+        for(int row = 0; row < 4; row++) {
 
             LinearLayout l = new LinearLayout(this);
             l.setLayoutParams(new LinearLayout.LayoutParams(gridWidth, gridHeight/4));
             l.setBackgroundResource(R.color.colorPrimaryDark);
-            //l.setLayoutParams(new LinearLayout.LayoutParams(250,50));
             l.setOrientation(LinearLayout.HORIZONTAL);
 
             for (int col = 0; col < 3; col++) {
@@ -65,13 +75,34 @@ public class MainActivity extends AppCompatActivity {
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        display.setText(display.getText() + String.valueOf(numList[r][c]));
+                        if (display.getText().equals("0."))
+                            display.setText(String.valueOf(numList[r][c]));
+                        else
+                            display.setText(display.getText() + String.valueOf(numList[r][c]));
                     }
                 });
 
                 l.addView(b);
                 Log.v("VERBOSE", "Populated col " + String.valueOf(col));
             }
+
+            Button b = new Button(this);
+            b.setWidth(gridWidth / 4);
+            b.setHeight(gridHeight / 4);
+            b.setText(String.valueOf(operatorList[row]));
+            b.setTextSize(40);
+            b.setBackgroundResource(R.color.buttonGrey);
+
+            final int r = row;
+            b.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    display.setText(display.getText() + String.valueOf(operatorList[r]));
+                }
+            });
+
+            l.addView(b);
+            Log.v("VERBOSE", "Populated col " + String.valueOf(operatorList[row]));
 
             buttonGrid.addView(l);
             Log.v("VERBOSE", "Populated row " + String.valueOf(row));
