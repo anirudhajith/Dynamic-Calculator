@@ -14,6 +14,8 @@ import org.w3c.dom.Text;
 
 public class MainActivity extends AppCompatActivity {
 
+    boolean resultObtained;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
         final TextView display = findViewById(R.id.display);
         final LinearLayout buttonGrid = findViewById(R.id.buttonGrid);
         final ViewTreeObserver observer = buttonGrid.getViewTreeObserver();
+        resultObtained = false;
 
         observer.addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -109,9 +112,10 @@ public class MainActivity extends AppCompatActivity {
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (display.getText().equals("0."))
+                        if (display.getText().equals("0.") || resultObtained) {
                             display.setText(String.valueOf(numList[r][c]));
-                        else
+                            resultObtained = false;
+                        } else
                             display.setText(display.getText() + String.valueOf(numList[r][c]));
                     }
                 });
@@ -136,19 +140,24 @@ public class MainActivity extends AppCompatActivity {
                     String newExpression;
                     int length = expression.length();
 
-                    switch (expression.charAt(length - 1)) {
-                        case '/':
-                        case 'x':
-                        case '+':
-                        case '-':
-                            newExpression = expression.substring(0,length-1) + operatorList[r];
-                            display.setText(newExpression);
-                            break;
 
-                        default:
-                            newExpression = expression + operatorList[r];
-                            display.setText(newExpression);
-                    }
+                        switch (expression.charAt(length - 1)) {
+                            case '/':
+                            case 'x':
+                            case '+':
+                            case '-':
+                                newExpression = expression.substring(0, length - 1) + operatorList[r];
+                                display.setText(newExpression);
+                                break;
+
+                            default:
+                                if (zeroOperators(expression)) {
+                                    newExpression = expression + operatorList[r];
+                                    display.setText(newExpression);
+                                }
+                        }
+
+                        resultObtained = false;
 
                 }
             });
@@ -169,9 +178,28 @@ public class MainActivity extends AppCompatActivity {
                 String expression = display.getText().toString();
                 String newExpression = evaluate(expression);
                 display.setText(newExpression);
+                resultObtained = true;
             }
         });
 
+    }
+
+    private boolean zeroOperators(String expression) {
+
+        int count = 0;
+
+        for (int i = 0; i < expression.length(); i++) {
+            switch (expression.charAt(i)) {
+                case '+':
+                case '-':
+                case 'x':
+                case '/':
+                    count++;
+                    break;
+            }
+        }
+
+        return count == 0;
     }
 
     private String evaluate(String expression) {
@@ -185,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
                 float result = Float.valueOf(operands[0]) * Float.valueOf(operands[1]);
                 return String.valueOf(result);
             } else if (expression.contains("+")) {
-                String operands[] = expression.split("+");
+                String operands[] = expression.split("\\+");
                 float result = Float.valueOf(operands[0]) + Float.valueOf(operands[1]);
                 return String.valueOf(result);
             } else if (expression.contains("-")) {
