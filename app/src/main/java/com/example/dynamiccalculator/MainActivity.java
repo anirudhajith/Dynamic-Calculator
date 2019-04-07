@@ -23,6 +23,26 @@ public class MainActivity extends AppCompatActivity {
         final LinearLayout buttonGrid = findViewById(R.id.buttonGrid);
         final ViewTreeObserver observer = buttonGrid.getViewTreeObserver();
 
+        observer.addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        populateButtonGrid();
+                        initializeMetaButtons();
+
+                        if (Build.VERSION.SDK_INT > 16) {
+                            buttonGrid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        } else {
+                            buttonGrid.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                        }
+                    }
+                });
+    }
+
+    private void initializeMetaButtons() {
+
+        final TextView display = findViewById(R.id.display);
+        final LinearLayout buttonGrid = findViewById(R.id.buttonGrid);
         final Button acButton = findViewById(R.id.AC);
         final Button delButton = findViewById(R.id.DEL);
 
@@ -37,23 +57,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String expression = display.getText().toString();
-                String newExpression = expression.substring(0, expression.length()-1);
+                String newExpression;
+
+                if (expression.length() > 0) {
+                    newExpression = expression.substring(0, expression.length() - 1);
+                } else {
+                    newExpression = expression;
+                }
                 display.setText(newExpression);
             }
         });
 
-        observer.addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        populateButtonGrid();
-                        if (Build.VERSION.SDK_INT > 16) {
-                            buttonGrid.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        } else {
-                            buttonGrid.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-                        }
-                    }
-                });
     }
 
     private void populateButtonGrid() {
