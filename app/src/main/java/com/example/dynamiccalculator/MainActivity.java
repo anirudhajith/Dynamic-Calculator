@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         final char operatorList[] = {
-                '/', 'x', '+', '-'
+                '÷', '×', '+', '-'
         };
 
         for(int row = 0; row < 4; row++) {
@@ -140,10 +140,10 @@ public class MainActivity extends AppCompatActivity {
                     String newExpression;
                     int length = expression.length();
 
-
+                    if (length > 0) {
                         switch (expression.charAt(length - 1)) {
-                            case '/':
-                            case 'x':
+                            case '÷':
+                            case '×':
                             case '+':
                             case '-':
                                 newExpression = expression.substring(0, length - 1) + operatorList[r];
@@ -156,8 +156,9 @@ public class MainActivity extends AppCompatActivity {
                                     display.setText(newExpression);
                                 }
                         }
+                    }
 
-                        resultObtained = false;
+                    resultObtained = false;
 
                 }
             });
@@ -192,24 +193,26 @@ public class MainActivity extends AppCompatActivity {
             switch (expression.charAt(i)) {
                 case '+':
                 case '-':
-                case 'x':
-                case '/':
+                case '×':
+                case '÷':
                     count++;
                     break;
             }
         }
+
+        if (expression.charAt(0) == '-') count = 0;
 
         return count == 0;
     }
 
     private String evaluate(String expression) {
         try {
-            if (expression.contains("/")) {
-                String operands[] = expression.split("/");
+            if (expression.contains("÷")) {
+                String operands[] = expression.split("÷");
                 float result = Float.valueOf(operands[0]) / Float.valueOf(operands[1]);
                 return String.valueOf(result);
-            } else if (expression.contains("x")) {
-                String operands[] = expression.split("x");
+            } else if (expression.contains("×")) {
+                String operands[] = expression.split("×");
                 float result = Float.valueOf(operands[0]) * Float.valueOf(operands[1]);
                 return String.valueOf(result);
             } else if (expression.contains("+")) {
