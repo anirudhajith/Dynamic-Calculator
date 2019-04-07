@@ -23,6 +23,25 @@ public class MainActivity extends AppCompatActivity {
         final LinearLayout buttonGrid = findViewById(R.id.buttonGrid);
         final ViewTreeObserver observer = buttonGrid.getViewTreeObserver();
 
+        final Button acButton = findViewById(R.id.AC);
+        final Button delButton = findViewById(R.id.DEL);
+
+        acButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                display.setText("0.");
+            }
+        });
+
+        delButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String expression = display.getText().toString();
+                String newExpression = expression.substring(0, expression.length()-1);
+                display.setText(newExpression);
+            }
+        });
+
         observer.addOnGlobalLayoutListener(
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
@@ -38,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void populateButtonGrid() {
+
         final LinearLayout buttonGrid = findViewById(R.id.buttonGrid);
         final TextView display = findViewById(R.id.display);
         int gridHeight = buttonGrid.getHeight();
@@ -97,7 +117,25 @@ public class MainActivity extends AppCompatActivity {
             b.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    display.setText(display.getText() + String.valueOf(operatorList[r]));
+
+                    String expression = display.getText().toString();
+                    String newExpression;
+                    int length = expression.length();
+
+                    switch (expression.charAt(length - 1)) {
+                        case '/':
+                        case 'x':
+                        case '+':
+                        case '-':
+                            newExpression = expression.substring(0,length-1) + operatorList[r];
+                            display.setText(newExpression);
+                            break;
+
+                        default:
+                            newExpression = expression + operatorList[r];
+                            display.setText(newExpression);
+                    }
+
                 }
             });
 
@@ -107,5 +145,45 @@ public class MainActivity extends AppCompatActivity {
             buttonGrid.addView(l);
             Log.v("VERBOSE", "Populated row " + String.valueOf(row));
         }
+
+        LinearLayout lastRow = (LinearLayout) buttonGrid.getChildAt(3);
+        Button equalsButton = (Button) lastRow.getChildAt(2);
+
+        equalsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String expression = display.getText().toString();
+                String newExpression = evaluate(expression);
+                display.setText(newExpression);
+            }
+        });
+
+    }
+
+    private String evaluate(String expression) {
+        try {
+            if (expression.contains("/")) {
+                String operands[] = expression.split("/");
+                float result = Float.valueOf(operands[0]) / Float.valueOf(operands[1]);
+                return String.valueOf(result);
+            } else if (expression.contains("x")) {
+                String operands[] = expression.split("x");
+                float result = Float.valueOf(operands[0]) * Float.valueOf(operands[1]);
+                return String.valueOf(result);
+            } else if (expression.contains("+")) {
+                String operands[] = expression.split("+");
+                float result = Float.valueOf(operands[0]) + Float.valueOf(operands[1]);
+                return String.valueOf(result);
+            } else if (expression.contains("-")) {
+                String operands[] = expression.split("-");
+                float result = Float.valueOf(operands[0]) - Float.valueOf(operands[1]);
+                return String.valueOf(result);
+            } else {
+                return "0.";
+            }
+        } catch (Exception e) {
+            Log.e("ERROR", expression);
+        }
+        return "0.";
     }
 }
